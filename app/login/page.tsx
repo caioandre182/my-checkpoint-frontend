@@ -1,10 +1,33 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import z from "zod";
+
+const loginSchema = z.object({
+    email: z.string().email('E-mail inválido'),
+    password: z.string().min(6, 'A senha precisa ter pelo menos 6 caracteres').max(32, 'A senha precisa ter no máximo 32 caracteres'),
+})
+
+type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
     const [animateSword, setAnimateSword] = useState<boolean>(false);
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<LoginFormData>({
+        resolver: zodResolver(loginSchema),
+    });
+
+    const onSubmit = (data: LoginFormData) => {
+        console.log(data);
+    }
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#D8BFD8] to-[#4169E1] flex items-center justify-center">
@@ -27,28 +50,30 @@ export default function LoginPage() {
                     />
                 </div>
 
-                {/* futura animação da espada aqui */}
-
-                <form className="flex flex-col gap-4">
+                <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
                     <div>
                         <label className="text-sm font-medium text-gray-300">E-mail</label>
                         <input
                             type="email"
+                            {...register("email")}
                             placeholder="email@exemplo.com"
                             className="w-full mt-1 p-3 rounded-md bg-[#2a2a2a] text-white border border-[#444] focus:outline-none focus:ring-2 focus:ring-blue-500"
                             onFocus={() => setAnimateSword(true)}
                             onBlur={() => setAnimateSword(false)}
                         />
+                        {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
                     </div>
                     <div>
                         <label className="text-sm font-medium text-gray-300">Senha</label>
                         <input
                             type="password"
+                            {...register("password")}
                             placeholder="••••••••"
                             className="w-full mt-1 p-3 rounded-md bg-[#2a2a2a] text-white border border-[#444] focus:outline-none focus:ring-2 focus:ring-blue-500"
                             onFocus={() => setAnimateSword(true)}
                             onBlur={() => setAnimateSword(false)}
                         />
+                        {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
                     </div>
                     <button
                         type="submit"
